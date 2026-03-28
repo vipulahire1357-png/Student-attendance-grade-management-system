@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import {
@@ -132,14 +134,12 @@ export default function LandingPage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Link
               href="/signup"
-              id="hero-cta-signup"
               className="btn-gradient flex items-center gap-2 text-base px-8 py-3.5"
             >
               Start Hiring Free <ArrowRight size={18} />
             </Link>
             <Link
               href="/login"
-              id="hero-cta-login"
               className="flex items-center gap-2 text-sm font-semibold px-6 py-3.5 rounded-xl transition-all"
               style={{
                 background: "rgba(255,255,255,0.05)",
@@ -213,8 +213,8 @@ export default function LandingPage() {
                 className="glass-card p-7 group cursor-default"
                 style={{ transition: "transform 0.2s ease" }}
                 onMouseEnter={(e) =>
-                  ((e.currentTarget as HTMLElement).style.transform =
-                    "translateY(-4px)")
+                ((e.currentTarget as HTMLElement).style.transform =
+                  "translateY(-4px)")
                 }
                 onMouseLeave={(e) =>
                   ((e.currentTarget as HTMLElement).style.transform = "none")
@@ -356,7 +356,6 @@ export default function LandingPage() {
           </p>
           <Link
             href="/signup"
-            id="footer-cta-signup"
             className="btn-gradient inline-flex items-center gap-2 text-base px-8 py-3.5 relative z-10"
           >
             Create Company Account <ArrowRight size={18} />
