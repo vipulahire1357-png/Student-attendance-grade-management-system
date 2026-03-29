@@ -357,6 +357,7 @@ Then run the schema file from the terminal. Replace `path/to/os-3` with your act
 
 **On Windows:**
 ```bash
+\i 'D:/Priority Projects/os-3/database/schema.sql' (in psql shell)
 psql -U postgres -d onlystudents -f path\to\os-3\database\schema.sql
 ```
 

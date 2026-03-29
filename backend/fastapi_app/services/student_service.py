@@ -4,6 +4,7 @@ Student Service — business logic for student-related operations.
 from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.orm import selectinload          # ← ADDED
 from fastapi import HTTPException, status
 
 from ..models.student import Student
@@ -46,8 +47,15 @@ async def create_student(db: AsyncSession, data: StudentSignup) -> Student:
 
 
 async def get_student_by_id(db: AsyncSession, student_id: int) -> Student:
-    """Fetch a student by PK; raises 404 if not found."""
-    result = await db.execute(select(Student).where(Student.id == student_id))
+    """Fetch a student by PK with relationships; raises 404 if not found."""
+    result = await db.execute(                   # ← UPDATED (added selectinload)
+        select(Student)
+        .options(
+            selectinload(Student.projects),
+            selectinload(Student.skills),
+        )
+        .where(Student.id == student_id)
+    )
     student = result.scalar_one_or_none()
     if not student:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Student not found.")
