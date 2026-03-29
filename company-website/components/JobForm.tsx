@@ -9,8 +9,20 @@ interface Props {
   onSuccess?: () => void;
 }
 
-const JOB_TYPES = ["Full-time", "Part-time", "Contract", "Internship", "Freelance"];
-const EXP_LEVELS = ["Entry", "Mid", "Senior", "Executive"];
+const JOB_TYPES = [
+  { label: "Full-time", value: "full-time" },
+  { label: "Part-time", value: "part-time" },
+  { label: "Contract", value: "contract" },
+  { label: "Internship", value: "internship" },
+  { label: "Remote", value: "remote" },
+];
+
+const EXP_LEVELS = [
+  { label: "Entry", value: "entry" },
+  { label: "Mid", value: "mid" },
+  { label: "Senior", value: "senior" },
+  { label: "Lead", value: "lead" },
+];
 
 export default function JobForm({ onSuccess }: Props) {
   const [submitting, setSubmitting] = useState(false);
@@ -39,8 +51,15 @@ export default function JobForm({ onSuccess }: Props) {
       onSuccess?.();
       setTimeout(() => setSuccess(false), 4000);
     } catch (err: unknown) {
-      const e = err as { response?: { data?: { detail?: string } } };
-      setError(e?.response?.data?.detail ?? "Failed to post job. Please try again.");
+      const e = err as { response?: { data?: { detail?: unknown } } };
+      const detail = e?.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setError(detail.map((d: { msg?: string }) => d.msg ?? String(d)).join(", "));
+      } else if (typeof detail === "string") {
+        setError(detail);
+      } else {
+        setError("Failed to post job. Please try again.");
+      }
     } finally {
       setSubmitting(false);
     }
@@ -139,8 +158,8 @@ export default function JobForm({ onSuccess }: Props) {
           >
             <option value="">Select type</option>
             {JOB_TYPES.map((t) => (
-              <option key={t} value={t} style={{ backgroundColor: "#0f1629" }}>
-                {t}
+              <option key={t.value} value={t.value} style={{ backgroundColor: "#0f1629" }}>
+                {t.label}
               </option>
             ))}
           </select>
@@ -155,8 +174,8 @@ export default function JobForm({ onSuccess }: Props) {
           >
             <option value="">Select level</option>
             {EXP_LEVELS.map((l) => (
-              <option key={l} value={l} style={{ backgroundColor: "#0f1629" }}>
-                {l}
+              <option key={l.value} value={l.value} style={{ backgroundColor: "#0f1629" }}>
+                {l.label}
               </option>
             ))}
           </select>
