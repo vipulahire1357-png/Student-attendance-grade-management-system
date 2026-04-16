@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Edit' if action=='edit' else 'Add' }} Course{% endblock %}
+{% block page_title %}{{ 'Edit' if action=='edit' else 'Add' }} Course{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>{{ 'Edit Course' if action=='edit' else 'Add New Course' }}</h2>
+    <p>{{ 'Update course information' if action=='edit' else 'Create a new course in the system' }}</p>
+  </div>
+  <a href="{{ url_for('courses') }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Back
+  </a>
+</div>
+
+<div style="max-width:600px;">
+  <div class="card">
+    <div class="card-header">
+      <i class="bi bi-book-fill" style="color:var(--accent)"></i>
+      <h5>Course Details</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST">
+        <div class="form-group">
+          <label class="form-label" for="course_name">Course Name *</label>
+          <input type="text" id="course_name" name="course_name" class="form-control"
+                 placeholder="e.g. Database Management Systems"
+                 value="{{ course.course_name if course else '' }}" required>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="form-group">
+            <label class="form-label" for="course_code">Course Code *</label>
+            <input type="text" id="course_code" name="course_code" class="form-control"
+                   placeholder="e.g. CS301"
+                   value="{{ course.course_code if course else '' }}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="credits">Credits *</label>
+            <input type="number" id="credits" name="credits" class="form-control"
+                   placeholder="e.g. 4" min="1" max="6"
+                   value="{{ course.credits if course else '' }}" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="department">Department</label>
+          <select id="department" name="department" class="form-select">
+            <option value="">— Select Department —</option>
+            {% set depts = ['Computer Science','Electronics','Mechanical','Civil','Information Technology','Chemical','Electrical'] %}
+            {% for d in depts %}
+              <option value="{{ d }}" {{ 'selected' if course and course.department==d else '' }}>{{ d }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary">
+            <i class="bi bi-{{ 'save-fill' if action=='edit' else 'plus-lg' }}"></i>
+            {{ 'Update Course' if action=='edit' else 'Add Course' }}
+          </button>
+          <a href="{{ url_for('courses') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Grades{% endblock %}
+{% block page_title %}Grades{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Grade Records</h2>
+    <p>View and manage student grades across all courses</p>
+  </div>
+  <a href="{{ url_for('grade_entry') }}" class="btn btn-primary">
+    <i class="bi bi-plus-circle-fill"></i> Enter Grade
+  </a>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('grades') }}"
+        style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;width:100%;">
+    <div class="form-group" style="min-width:160px;flex:1;margin-bottom:0;">
+      <label class="form-label" for="f_course">Course</label>
+      <select class="form-select" name="course_id" id="f_course">
+        <option value="">All Courses</option>
+        {% for c in courses %}
+          <option value="{{ c.course_id }}"
+            {% if c.course_id|string == sel_course %}selected{% endif %}>
+            {{ c.course_code }} — {{ c.course_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="min-width:160px;flex:1;margin-bottom:0;">
+      <label class="form-label" for="f_student">Student</label>
+      <select class="form-select" name="student_id" id="f_student">
+        <option value="">All Students</option>
+        {% for s in students %}
+          <option value="{{ s.student_id }}"
+            {% if s.student_id|string == sel_student %}selected{% endif %}>
+            {{ s.name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:0;">
+      <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Filter</button>
+      <a href="{{ url_for('grades') }}" class="btn btn-secondary"><i class="bi bi-x"></i> Clear</a>
+    </div>
+  </form>
+</div>
+
+<!-- Grades Table -->
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-bar-chart-fill" style="color:var(--accent)"></i>
+    <h5>Grade Records <span style="font-size:0.8rem;color:var(--text-muted);font-weight:400;">({{ records|length }} records)</span></h5>
+  </div>
+  <div class="table-responsive">
+    {% if records %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Course</th>
+          <th>Internal</th>
+          <th>External</th>
+          <th>Total</th>
+          <th>Grade</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td style="font-weight:600;">{{ r.student_name }}</td>
+          <td><span style="font-size:0.76rem;color:var(--text-muted);">{{ r.department }}</span></td>
+          <td>
+            <span style="font-weight:500;">{{ r.course_name }}</span><br>
+            <span style="font-size:0.74rem;color:var(--text-muted);">{{ r.course_code }}</span>
+          </td>
+          <td>{{ r.internal_marks }}</td>
+          <td>{{ r.external_marks }}</td>
+          <td style="font-weight:700;">{{ r.total_marks }}</td>
+          <td>
+            <span class="grade-badge grade-{{ r.grade }}">{{ r.grade }}</span>
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('delete_grade', gid=r.grade_id) }}"
+                  onsubmit="return confirm('Delete this grade record?')"
+                  style="display:inline;">
+              <button type="submit" class="btn btn-sm btn-danger btn-icon"
+                      data-tooltip="Delete">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-bar-chart"></i>
+      <p>No grade records found. <a href="{{ url_for('grade_entry') }}" style="color:var(--primary-light);">Enter a grade.</a></p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

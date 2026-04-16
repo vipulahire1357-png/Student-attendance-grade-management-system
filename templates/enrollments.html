@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% block title %}Enrollments{% endblock %}
+{% block page_title %}Enrollment Management{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Enrollments</h2>
+    <p>Assign students to courses (many-to-many relationship)</p>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:340px 1fr;gap:20px;align-items:start;">
+
+  <!-- Enroll Form -->
+  <div class="card">
+    <div class="card-header">
+      <i class="bi bi-person-plus-fill" style="color:var(--success)"></i>
+      <h5>Enroll Student</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('add_enrollment') }}">
+        <div class="form-group">
+          <label class="form-label" for="enroll_student">Select Student *</label>
+          <select id="enroll_student" name="student_id" class="form-select" required>
+            <option value="">— Choose Student —</option>
+            {% for s in students %}
+              <option value="{{ s.student_id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="enroll_course">Select Course *</label>
+          <select id="enroll_course" name="course_id" class="form-select" required>
+            <option value="">— Choose Course —</option>
+            {% for c in courses %}
+              <option value="{{ c.course_id }}">{{ c.course_name }} ({{ c.course_code }})</option>
+            {% endfor %}
+          </select>
+        </div>
+        <button type="submit" class="btn btn-success" style="width:100%;">
+          <i class="bi bi-person-plus-fill"></i> Enroll Now
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Enrollment List -->
+  <div class="card">
+    <div class="card-header">
+      <i class="bi bi-list-check" style="color:var(--primary-light)"></i>
+      <h5>All Enrollments <span style="color:var(--text-muted);font-weight:400;font-size:0.85rem;">({{ enrollments|length }})</span></h5>
+    </div>
+    <div class="table-responsive">
+      {% if enrollments %}
+      <table class="data-table">
+        <thead>
+          <tr><th>#</th><th>Student</th><th>Department</th><th>Course</th><th>Code</th><th>Enrolled On</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          {% for e in enrollments %}
+          <tr>
+            <td style="color:var(--text-muted)">{{ e.enrollment_id }}</td>
+            <td style="font-weight:600;">{{ e.student_name }}</td>
+            <td style="font-size:0.8rem;color:var(--text-muted)">{{ e.department }}</td>
+            <td>{{ e.course_name }}</td>
+            <td>
+              <span style="background:rgba(6,182,212,0.15);color:var(--accent);padding:2px 8px;border-radius:5px;font-size:0.75rem;font-weight:700;">
+                {{ e.course_code }}
+              </span>
+            </td>
+            <td style="color:var(--text-muted);font-size:0.82rem;">{{ e.enrolled_on }}</td>
+            <td>
+              <form method="POST" action="{{ url_for('delete_enrollment', eid=e.enrollment_id) }}" style="display:inline">
+                <button type="submit" class="btn btn-danger btn-sm btn-delete-confirm">
+                  <i class="bi bi-trash-fill"></i>
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+        <div class="empty-state">
+          <i class="bi bi-person-x"></i>
+          <p>No enrollments yet. Use the form to enroll a student.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}

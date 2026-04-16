@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}Attendance{% endblock %}
+{% block page_title %}Attendance Records{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Attendance</h2>
+    <p>View and filter attendance records</p>
+  </div>
+  <a href="{{ url_for('mark_attendance') }}" class="btn btn-primary">
+    <i class="bi bi-calendar-plus-fill"></i> Mark Attendance
+  </a>
+</div>
+
+<!-- Filters -->
+<form method="GET" class="filter-bar">
+  <div class="form-group">
+    <label class="form-label">Filter by Course</label>
+    <select name="course_id" class="form-select" id="att_filter_course">
+      <option value="">All Courses</option>
+      {% for c in courses %}
+        <option value="{{ c.course_id }}" {{ 'selected' if sel_course==c.course_id|string else '' }}>
+          {{ c.course_name }} ({{ c.course_code }})
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Filter by Student</label>
+    <select name="student_id" class="form-select">
+      <option value="">All Students</option>
+      {% for s in students %}
+        <option value="{{ s.student_id }}" {{ 'selected' if sel_student==s.student_id|string else '' }}>{{ s.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="form-group">
+    <label class="form-label">Filter by Date</label>
+    <input type="date" name="date" class="form-control" value="{{ sel_date }}">
+  </div>
+  <div style="display:flex;gap:8px;align-items:flex-end;">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Filter</button>
+    <a href="{{ url_for('attendance') }}" class="btn btn-secondary"><i class="bi bi-x-lg"></i> Clear</a>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-calendar-check-fill" style="color:var(--success)"></i>
+    <h5>Records <span style="color:var(--text-muted);font-weight:400;font-size:0.85rem;">({{ records|length }} found)</span></h5>
+  </div>
+  <div class="table-responsive">
+    {% if records %}
+    <table class="data-table">
+      <thead>
+        <tr><th>#</th><th>Student</th><th>Course</th><th>Date</th><th>Status</th><th>Action</th></tr>
+      </thead>
+      <tbody>
+        {% for r in records %}
+        <tr>
+          <td style="color:var(--text-muted)">{{ r.attendance_id }}</td>
+          <td style="font-weight:600;">{{ r.student_name }}</td>
+          <td>
+            <span style="font-size:0.8rem;background:rgba(6,182,212,0.12);color:var(--accent);padding:2px 8px;border-radius:5px;">
+              {{ r.course_code }}
+            </span>
+            <span style="font-size:0.82rem;color:var(--text-muted);margin-left:4px;">{{ r.course_name }}</span>
+          </td>
+          <td style="font-size:0.85rem;">{{ r.date }}</td>
+          <td>
+            <span class="badge-pill badge-{{ r.status|lower }}">
+              {% if r.status == 'Present' %}✓{% elif r.status == 'Absent' %}✗{% else %}⏱{% endif %}
+              {{ r.status }}
+            </span>
+          </td>
+          <td>
+            <form method="POST" action="{{ url_for('delete_attendance', aid=r.attendance_id) }}" style="display:inline">
+              <button type="submit" class="btn btn-danger btn-sm btn-delete-confirm" title="Delete record">
+                <i class="bi bi-trash-fill"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+      <div class="empty-state">
+        <i class="bi bi-calendar-x"></i>
+        <p>No attendance records found for the selected filters.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

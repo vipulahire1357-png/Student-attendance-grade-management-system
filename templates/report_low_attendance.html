@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Low Attendance Alert{% endblock %}
+{% block page_title %}Low Attendance Alert{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Low Attendance Alert</h2>
+    <p>Students requiring immediate attention — below attendance threshold</p>
+  </div>
+  <a href="{{ url_for('reports') }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> All Reports
+  </a>
+</div>
+
+<!-- Threshold selector -->
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('report_low_attendance') }}"
+        style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;width:100%;">
+    <div class="form-group" style="max-width:160px;margin-bottom:0;">
+      <label class="form-label" for="rla_threshold">Threshold %</label>
+      <input type="number" class="form-control" name="threshold" id="rla_threshold"
+             value="{{ threshold }}" min="0" max="100" placeholder="75">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="submit" class="btn btn-danger"><i class="bi bi-search"></i> Apply</button>
+      <a href="{{ url_for('report_low_attendance') }}" class="btn btn-secondary"><i class="bi bi-x"></i> Reset</a>
+    </div>
+  </form>
+</div>
+
+{% if rows %}
+<div class="alert alert-danger">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  <strong>{{ rows|length }}</strong> student-course combination(s) found below <strong>{{ threshold }}%</strong> attendance.
+  These students may be at risk.
+</div>
+
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-exclamation-triangle-fill" style="color:var(--danger)"></i>
+    <h5>At-Risk Students</h5>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Course</th>
+          <th style="text-align:center;">Total Classes</th>
+          <th style="text-align:center;">Present</th>
+          <th style="text-align:center;">Absent</th>
+          <th style="text-align:center;">Late</th>
+          <th style="text-align:center;">Attendance %</th>
+          <th style="text-align:center;">Shortfall</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td style="font-weight:600;">{{ r.student_name }}</td>
+          <td><span style="font-size:0.76rem;color:var(--text-muted);">{{ r.department }}</span></td>
+          <td>
+            <span style="font-weight:500;">{{ r.course_name }}</span><br>
+            <span style="font-size:0.74rem;color:var(--text-muted);">{{ r.course_code }}</span>
+          </td>
+          <td style="text-align:center;">{{ r.total_classes }}</td>
+          <td style="text-align:center;color:#34d399;font-weight:600;">{{ r.present_count }}</td>
+          <td style="text-align:center;color:#f87171;font-weight:600;">{{ r.absent_count }}</td>
+          <td style="text-align:center;color:#fbbf24;font-weight:600;">{{ r.late_count }}</td>
+          <td style="text-align:center;">
+            {% if r.attendance_percentage is not none %}
+              <span class="att-low">{{ r.attendance_percentage }}%</span>
+            {% else %}
+              <span style="color:var(--text-muted);">0%</span>
+            {% endif %}
+          </td>
+          <td style="text-align:center;">
+            {% if r.attendance_percentage is not none %}
+              {% set gap = threshold|float - r.attendance_percentage|float %}
+              {% if gap > 0 %}
+                <span style="color:#f87171;font-weight:700;">-{{ "%.1f"|format(gap) }}%</span>
+              {% else %}
+                <span style="color:#34d399;">✓</span>
+              {% endif %}
+            {% else %}
+              <span style="color:#f87171;font-weight:700;">-{{ threshold }}%</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="alert alert-success">
+  <i class="bi bi-check-circle-fill"></i>
+  All students meet the <strong>{{ threshold }}%</strong> attendance threshold. Great job! 🎉
+</div>
+<div class="card">
+  <div class="card-body">
+    <div class="empty-state">
+      <i class="bi bi-check-circle-fill" style="color:var(--success);opacity:0.7;"></i>
+      <p>No students below {{ threshold }}% attendance found.</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% block title %}Top Students Report{% endblock %}
+{% block page_title %}Top Students Report{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Top Performing Students</h2>
+    <p>Ranked by average total marks across all courses</p>
+  </div>
+  <a href="{{ url_for('reports') }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> All Reports
+  </a>
+</div>
+
+{% if rows %}
+<!-- Podium for top 3 -->
+{% set top3 = rows[:3] %}
+<div style="display:flex;gap:20px;justify-content:center;align-items:flex-end;margin-bottom:32px;flex-wrap:wrap;">
+  {% if top3|length >= 2 %}
+  <!-- 2nd Place -->
+  <div class="card" style="width:200px;text-align:center;padding:20px 16px;border-color:rgba(148,163,184,0.3);">
+    <div style="font-size:2rem;margin-bottom:8px;">🥈</div>
+    <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;color:#fff;">{{ top3[1].name }}</div>
+    <div style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 10px;">{{ top3[1].department }}</div>
+    <div style="font-size:1.5rem;font-weight:700;color:#cbd5e1;">{{ top3[1].avg_marks }}</div>
+    <div style="font-size:0.7rem;color:var(--text-muted);">avg marks</div>
+  </div>
+  {% endif %}
+
+  {% if top3|length >= 1 %}
+  <!-- 1st Place -->
+  <div class="card" style="width:220px;text-align:center;padding:24px 16px;border-color:rgba(245,158,11,0.5);box-shadow:0 0 32px rgba(245,158,11,0.15);">
+    <div style="font-size:2.5rem;margin-bottom:8px;">🥇</div>
+    <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:1.05rem;color:#fff;">{{ top3[0].name }}</div>
+    <div style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 12px;">{{ top3[0].department }}</div>
+    <div style="font-size:1.8rem;font-weight:700;color:var(--warning);">{{ top3[0].avg_marks }}</div>
+    <div style="font-size:0.7rem;color:var(--text-muted);">avg marks</div>
+  </div>
+  {% endif %}
+
+  {% if top3|length >= 3 %}
+  <!-- 3rd Place -->
+  <div class="card" style="width:200px;text-align:center;padding:20px 16px;border-color:rgba(180,120,60,0.3);">
+    <div style="font-size:2rem;margin-bottom:8px;">🥉</div>
+    <div style="font-family:'Outfit',sans-serif;font-weight:700;font-size:0.95rem;color:#fff;">{{ top3[2].name }}</div>
+    <div style="font-size:0.75rem;color:var(--text-muted);margin:4px 0 10px;">{{ top3[2].department }}</div>
+    <div style="font-size:1.5rem;font-weight:700;color:#d6855a;">{{ top3[2].avg_marks }}</div>
+    <div style="font-size:0.7rem;color:var(--text-muted);">avg marks</div>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Full Rankings Table -->
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-trophy-fill" style="color:var(--warning)"></i>
+    <h5>Full Rankings</h5>
+  </div>
+  <div class="table-responsive">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Student</th>
+          <th>Department</th>
+          <th style="text-align:center;">Courses Taken</th>
+          <th style="text-align:center;">Avg Marks</th>
+          <th style="text-align:center;">Highest</th>
+          <th style="text-align:center;">Lowest</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr {% if loop.index <= 3 %}style="background:rgba(245,158,11,0.04);"{% endif %}>
+          <td>
+            {% if loop.index == 1 %}🥇
+            {% elif loop.index == 2 %}🥈
+            {% elif loop.index == 3 %}🥉
+            {% else %}
+              <span style="font-weight:600;color:var(--text-muted);">{{ loop.index }}</span>
+            {% endif %}
+          </td>
+          <td style="font-weight:600;">{{ r.name }}</td>
+          <td><span style="font-size:0.76rem;color:var(--text-muted);">{{ r.department }}</span></td>
+          <td style="text-align:center;">{{ r.courses_taken }}</td>
+          <td style="text-align:center;">
+            <span class="{% if r.avg_marks >= 80 %}att-high{% elif r.avg_marks >= 60 %}att-medium{% else %}att-low{% endif %}">
+              {{ r.avg_marks }}
+            </span>
+          </td>
+          <td style="text-align:center;color:#34d399;font-weight:600;">{{ r.highest }}</td>
+          <td style="text-align:center;color:#f87171;font-weight:600;">{{ r.lowest }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% else %}
+<div class="card">
+  <div class="card-body">
+    <div class="empty-state">
+      <i class="bi bi-trophy"></i>
+      <p>No grade data available yet. <a href="{{ url_for('grade_entry') }}" style="color:var(--primary-light);">Enter grades</a> to see rankings.</p>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

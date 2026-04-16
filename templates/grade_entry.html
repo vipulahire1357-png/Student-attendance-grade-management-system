@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block title %}Enter Grade{% endblock %}
+{% block page_title %}Enter / Update Grade{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Enter / Update Grade</h2>
+    <p>Internal (0–50) + External (0–50) → trigger auto-calculates total &amp; letter grade</p>
+  </div>
+  <a href="{{ url_for('grades') }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> Back to Grades
+  </a>
+</div>
+
+<div style="max-width:560px;margin:0 auto;">
+  <div class="card">
+    <div class="card-header">
+      <i class="bi bi-pencil-square" style="color:var(--primary-light)"></i>
+      <h5>Grade Entry Form</h5>
+    </div>
+    <div class="card-body">
+      <form method="POST" action="{{ url_for('grade_entry') }}">
+
+        <div class="form-group">
+          <label class="form-label" for="g_student">Student</label>
+          <select class="form-select" name="student_id" id="g_student" required>
+            <option value="">— Select Student —</option>
+            {% for s in students %}
+              <option value="{{ s.student_id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="g_course">Course</label>
+          <select class="form-select" name="course_id" id="g_course" required>
+            <option value="">— Select Course —</option>
+            {% for c in courses %}
+              <option value="{{ c.course_id }}">{{ c.course_code }} — {{ c.course_name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <div class="form-group">
+            <label class="form-label" for="g_internal">Internal Marks <span style="color:var(--text-muted)">(0–50)</span></label>
+            <input type="number" class="form-control" name="internal_marks" id="g_internal"
+                   min="0" max="50" step="0.01" placeholder="e.g. 38" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="g_external">External Marks <span style="color:var(--text-muted)">(0–50)</span></label>
+            <input type="number" class="form-control" name="external_marks" id="g_external"
+                   min="0" max="50" step="0.01" placeholder="e.g. 42" required>
+          </div>
+        </div>
+
+        <!-- Live total preview -->
+        <div style="background:rgba(79,70,229,0.1);border:1px solid rgba(79,70,229,0.25);border-radius:var(--radius-sm);padding:14px 18px;margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:0.85rem;color:var(--text-muted);">Estimated Total</span>
+            <span id="liveTotal" style="font-family:'Outfit',sans-serif;font-size:1.4rem;font-weight:700;color:#fff;">—</span>
+            <span class="grade-badge" id="liveBadge" style="opacity:0;">—</span>
+          </div>
+        </div>
+
+        <!-- Grade scale reference -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px;">
+          {% for g, rng in [('O','≥90'),('A','≥80'),('B','≥70'),('C','≥60'),('D','≥50'),('F','<50')] %}
+          <div style="display:flex;align-items:center;gap:5px;">
+            <span class="grade-badge grade-{{ g }}" style="width:28px;height:28px;font-size:0.78rem;">{{ g }}</span>
+            <span style="font-size:0.72rem;color:var(--text-muted);">{{ rng }}</span>
+          </div>
+          {% endfor %}
+        </div>
+
+        <div style="display:flex;gap:12px;justify-content:flex-end;">
+          <a href="{{ url_for('grades') }}" class="btn btn-secondary">Cancel</a>
+          <button type="submit" class="btn btn-success">
+            <i class="bi bi-save-fill"></i> Save Grade
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const internal = document.getElementById('g_internal');
+const external = document.getElementById('g_external');
+const liveTotal = document.getElementById('liveTotal');
+const liveBadge = document.getElementById('liveBadge');
+
+const gradeMap = [
+  [90,'O','grade-O'],[80,'A','grade-A'],[70,'B','grade-B'],
+  [60,'C','grade-C'],[50,'D','grade-D'],[0,'F','grade-F']
+];
+
+function updatePreview() {
+  const i = parseFloat(internal.value) || 0;
+  const e = parseFloat(external.value) || 0;
+  const total = i + e;
+  if (internal.value === '' && external.value === '') {
+    liveTotal.textContent = '—';
+    liveBadge.style.opacity = '0';
+    return;
+  }
+  liveTotal.textContent = total.toFixed(2);
+  for (const [threshold, letter, cls] of gradeMap) {
+    if (total >= threshold) {
+      liveBadge.textContent = letter;
+      liveBadge.className = 'grade-badge ' + cls;
+      liveBadge.style.opacity = '1';
+      break;
+    }
+  }
+}
+internal.addEventListener('input', updatePreview);
+external.addEventListener('input', updatePreview);
+</script>
+{% endblock %}

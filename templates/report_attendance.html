@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% block title %}Attendance Report{% endblock %}
+{% block page_title %}Attendance Report{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h2>Attendance Report</h2>
+    <p>Student-wise attendance summary per course</p>
+  </div>
+  <a href="{{ url_for('reports') }}" class="btn btn-secondary">
+    <i class="bi bi-arrow-left"></i> All Reports
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('report_attendance') }}"
+        style="display:flex;flex-wrap:wrap;gap:14px;align-items:flex-end;width:100%;">
+    <div class="form-group" style="flex:1;min-width:160px;margin-bottom:0;">
+      <label class="form-label" for="ra_course">Course</label>
+      <select class="form-select" name="course_id" id="ra_course">
+        <option value="">All Courses</option>
+        {% for c in courses %}
+          <option value="{{ c.course_id }}"
+            {% if c.course_id|string == sel_course %}selected{% endif %}>
+            {{ c.course_code }} — {{ c.course_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="form-group" style="max-width:130px;margin-bottom:0;">
+      <label class="form-label" for="ra_threshold">Threshold %</label>
+      <input type="number" class="form-control" name="threshold" id="ra_threshold"
+             value="{{ threshold }}" min="0" max="100" placeholder="75">
+    </div>
+    <div style="display:flex;gap:8px;">
+      <button type="submit" class="btn btn-primary"><i class="bi bi-funnel-fill"></i> Filter</button>
+      <a href="{{ url_for('report_attendance', show_all='1') }}" class="btn btn-secondary">
+        <i class="bi bi-list-ul"></i> Show All
+      </a>
+      <a href="{{ url_for('report_attendance') }}" class="btn btn-secondary"><i class="bi bi-x"></i> Reset</a>
+    </div>
+  </form>
+</div>
+
+{% if show_all == '0' %}
+<div class="alert alert-warning">
+  <i class="bi bi-exclamation-triangle-fill"></i>
+  Showing students below <strong>{{ threshold }}%</strong> attendance.
+  <a href="{{ url_for('report_attendance', show_all='1', course_id=sel_course) }}"
+     style="color:var(--warning);margin-left:8px;text-decoration:underline;">Show all →</a>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="card-header">
+    <i class="bi bi-calendar-check-fill" style="color:var(--accent)"></i>
+    <h5>Results <span style="font-size:0.8rem;color:var(--text-muted);font-weight:400;">({{ rows|length }} records)</span></h5>
+  </div>
+  <div class="table-responsive">
+    {% if rows %}
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Department</th>
+          <th>Course</th>
+          <th style="text-align:center;">Total Classes</th>
+          <th style="text-align:center;">Present</th>
+          <th style="text-align:center;">Absent</th>
+          <th style="text-align:center;">Late</th>
+          <th style="text-align:center;">Attendance %</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+        <tr>
+          <td>{{ loop.index }}</td>
+          <td style="font-weight:600;">{{ r.student_name }}</td>
+          <td><span style="font-size:0.76rem;color:var(--text-muted);">{{ r.department }}</span></td>
+          <td>
+            <span style="font-weight:500;">{{ r.course_name }}</span><br>
+            <span style="font-size:0.74rem;color:var(--text-muted);">{{ r.course_code }}</span>
+          </td>
+          <td style="text-align:center;">{{ r.total_classes }}</td>
+          <td style="text-align:center;color:#34d399;font-weight:600;">{{ r.present_count }}</td>
+          <td style="text-align:center;color:#f87171;font-weight:600;">{{ r.absent_count }}</td>
+          <td style="text-align:center;color:#fbbf24;font-weight:600;">{{ r.late_count }}</td>
+          <td style="text-align:center;">
+            {% if r.attendance_percentage is not none %}
+              <span class="{% if r.attendance_percentage >= 75 %}att-high{% elif r.attendance_percentage >= 60 %}att-medium{% else %}att-low{% endif %}">
+                {{ r.attendance_percentage }}%
+              </span>
+            {% else %}
+              <span style="color:var(--text-muted);">—</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <div class="empty-state">
+      <i class="bi bi-check-circle-fill" style="color:var(--success);opacity:0.6;"></i>
+      <p>No students found matching this filter.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
