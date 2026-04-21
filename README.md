@@ -604,4 +604,6 @@ This project was built to fulfil the requirements of a Final-Year DBMS course, d
 
 ---
 
+## Author: Vipul Ahire
+
 *Built with Flask + PostgreSQL + Vanilla CSS | Academic Project 2025–26*
